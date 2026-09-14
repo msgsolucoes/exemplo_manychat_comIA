@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run release:check
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-public-placeholder
+          SUPABASE_URL: https://example.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ci-secret-placeholder
+          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+          APP_BASE_URL: https://example.com
+          ADMIN_PASSWORD: ci-password-placeholder
+          ADMIN_SESSION_SECRET: ci-session-placeholder-with-more-than-32-characters
+          WORKER_SECRET: ci-worker-placeholder-with-more-than-32-characters
+          INSTAGRAM_APP_ID: "123456789"
+          INSTAGRAM_APP_SECRET: ci-meta-placeholder
+          INSTAGRAM_REDIRECT_URI: https://example.com/api/oauth/callback
+          WEBHOOK_VERIFY_TOKEN: ci-webhook-placeholder-with-more-than-32-characters

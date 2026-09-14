@@ -1,0 +1,52 @@
+const path = require("node:path");
+const { loadEnvFile } = require("./migration-utils.cjs");
+
+const required = [
+  "NEXT_PUBLIC_SUPABASE_URL",
+  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+  "SUPABASE_URL",
+  "SUPABASE_SERVICE_ROLE_KEY",
+  "DATABASE_URL",
+  "APP_BASE_URL",
+  "ADMIN_PASSWORD",
+  "ADMIN_SESSION_SECRET",
+  "WORKER_SECRET",
+  "INSTAGRAM_APP_ID",
+  "INSTAGRAM_APP_SECRET",
+  "INSTAGRAM_REDIRECT_URI",
+  "WEBHOOK_VERIFY_TOKEN",
+];
+
+const envFile = path.join(process.cwd(), ".env.local");
+const loaded = loadEnvFile(envFile);
+const missing = required.filter((key) => !process.env[key]);
+const placeholders = /^(SEU_|SUA_|CRIE_|GERE_|troque-|gere-|https:\/\/SEU-|postgresql:\/\/postgres\.SEU-)/i;
+const placeholderKeys = required.filter((key) => placeholders.test(process.env[key] || ""));
+const errors = [];
+const warnings = [];
+
+if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_URL
+  && process.env.NEXT_PUBLIC_SUPABASE_URL !== process.env.SUPABASE_URL) {
+  errors.push("NEXT_PUBLIC_SUPABASE_URL e SUPABASE_URL apontam para projetos diferentes.");
+}
+
+if (process.env.APP_BASE_URL && process.env.INSTAGRAM_REDIRECT_URI) {
+  const expected = `${process.env.APP_BASE_URL.replace(/\/$/, "")}/api/oauth/callback`;
+  if (process.env.INSTAGRAM_REDIRECT_URI !== expected) errors.push(`INSTAGRAM_REDIRECT_URI deve ser ${expected}`);
+}
+
+for (const key of ["ADMIN_SESSION_SECRET", "WORKER_SECRET", "WEBHOOK_VERIFY_TOKEN"]) {
+  const value = process.env[key] || "";
+  if (value && value.length < 32) warnings.push(`${key} deve ter pelo menos 32 caracteres.`);
+}
+
+if (process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD.length < 12) warnings.push("ADMIN_PASSWORD deve ter pelo menos 12 caracteres.");
+
+console.log(loaded ? "Arquivo .env.local carregado." : ".env.local nao encontrado; usando variaveis do processo.");
+if (missing.length) errors.push(`Variaveis ausentes: ${missing.join(", ")}`);
+if (placeholderKeys.length) errors.push(`Substitua os valores de exemplo: ${placeholderKeys.join(", ")}`);
+for (const warning of warnings) console.warn(`[aviso] ${warning}`);
+for (const error of errors) console.error(`[erro] ${error}`);
+
+if (errors.length) process.exitCode = 1;
+else console.log("Ambiente configurado corretamente.");
