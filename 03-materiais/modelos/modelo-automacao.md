@@ -1,0 +1,21 @@
+# Modelo de automação
+
+- **Nome:**
+- **Objetivo:**
+- **Gatilho:** comentário / story / mensagem
+- **Palavra-chave principal:**
+- **Alternativas:**
+- **Correspondência:** exata / contém / qualquer
+- **Post específico:** sim / não
+- **URL do post:**
+- **Resposta pública 1:**
+- **Resposta pública 2:**
+- **Resposta pública 3:**
+- **DM inicial:**
+- **Resposta rápida:**
+- **Texto de entrega:**
+- **Rótulo do botão:**
+- **URL:**
+- **Lembrete opcional:**
+- **Atraso:**
+- **Critério de sucesso:**
